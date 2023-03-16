@@ -9,9 +9,8 @@ import (
 	"golang.org/x/tools/go/ast/inspector"
 )
 
-const doc = "missingtypeguard is ..."
+const doc = "missingtypeguard checks if types that implement an interface have a type guard for it"
 
-// Analyzer is ...
 var Analyzer = &analysis.Analyzer{
 	Name: "missingtypeguard",
 	Doc:  doc,
