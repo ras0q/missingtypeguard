@@ -24,9 +24,22 @@ var Analyzer = &analysis.Analyzer{
 func run(pass *analysis.Pass) (any, error) {
 	inspect := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 
-	typeGuardOwners := make(map[string]struct{})
+	typeGuardOwners := make(map[string]map[string]struct{})
 
-	// 1. Find all type guards for `Animal`
+	// find interfaces in the package
+	inspect.Preorder([]ast.Node{(*ast.TypeSpec)(nil)}, func(n ast.Node) {
+		switch n := n.(type) {
+		case *ast.TypeSpec:
+			if _, ok := n.Type.(*ast.InterfaceType); !ok {
+				return
+			}
+
+			itype := pass.TypesInfo.TypeOf(n.Name)
+			typeGuardOwners[itype.String()] = make(map[string]struct{})
+		}
+	})
+
+	// find all type guards for `Animal`
 	inspect.Preorder([]ast.Node{(*ast.ValueSpec)(nil)}, func(n ast.Node) {
 		switch n := n.(type) {
 		case *ast.ValueSpec:
@@ -35,12 +48,12 @@ func run(pass *analysis.Pass) (any, error) {
 			}
 
 			if ident, ok := n.Type.(*ast.Ident); ok && ident.Name == "Animal" {
-				typeGuardOwners[pass.TypesInfo.TypeOf(n.Values[0]).String()] = struct{}{}
+				typeGuardOwners["a.Animal"][pass.TypesInfo.TypeOf(n.Values[0]).String()] = struct{}{}
 			}
 		}
 	})
 
-	// 2. Find structs missing type guards for `Animal`
+	// find structs missing type guards for `Animal`
 	inspect.Preorder([]ast.Node{(*ast.TypeSpec)(nil)}, func(n ast.Node) {
 		switch n := n.(type) {
 		case *ast.TypeSpec:
@@ -55,7 +68,7 @@ func run(pass *analysis.Pass) (any, error) {
 
 			ntype := pass.TypesInfo.TypeOf(n.Name)
 			if types.Implements(ntype, i) {
-				if _, ok := typeGuardOwners[ntype.String()]; !ok {
+				if _, ok := typeGuardOwners["a.Animal"][ntype.String()]; !ok {
 					pass.Reportf(n.Pos(), "%s is missing a type guard for Animal", n.Name.Name)
 				}
 
@@ -64,7 +77,7 @@ func run(pass *analysis.Pass) (any, error) {
 
 			nptype := types.NewPointer(ntype)
 			if types.Implements(nptype, i) {
-				if _, ok := typeGuardOwners[nptype.String()]; !ok {
+				if _, ok := typeGuardOwners["a.Animal"][nptype.String()]; !ok {
 					pass.Reportf(n.Pos(), "%s is missing a type guard for Animal", n.Name.Name)
 				}
 			}
