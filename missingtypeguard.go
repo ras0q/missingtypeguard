@@ -24,7 +24,7 @@ var Analyzer = &analysis.Analyzer{
 func run(pass *analysis.Pass) (any, error) {
 	inspect := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 
-	typeGuardOwnersByInterfaces := make(map[string]map[string]struct{})
+	typeGuardOwnersByInterfaces := make(map[types.Type]map[string]struct{})
 
 	// find interfaces in the package
 	inspect.Preorder([]ast.Node{(*ast.TypeSpec)(nil)}, func(n ast.Node) {
@@ -35,7 +35,7 @@ func run(pass *analysis.Pass) (any, error) {
 			}
 
 			itype := pass.TypesInfo.TypeOf(n.Name)
-			typeGuardOwnersByInterfaces[itype.String()] = make(map[string]struct{})
+			typeGuardOwnersByInterfaces[itype] = make(map[string]struct{})
 		}
 	})
 
@@ -49,7 +49,7 @@ func run(pass *analysis.Pass) (any, error) {
 
 			itype := pass.TypesInfo.TypeOf(n.Type)
 			ntype := pass.TypesInfo.TypeOf(n.Values[0])
-			typeGuardOwnersByInterfaces[itype.String()][ntype.String()] = struct{}{}
+			typeGuardOwnersByInterfaces[itype][ntype.String()] = struct{}{}
 		}
 	})
 
