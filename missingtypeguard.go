@@ -48,10 +48,13 @@ func run(pass *analysis.Pass) (any, error) {
 				return
 			}
 
-			ntype := pass.TypesInfo.TypeOf(n.Name)
-			i := pass.Pkg.Scope().Lookup("Animal")
+			i, ok := pass.Pkg.Scope().Lookup("Animal").Type().Underlying().(*types.Interface)
+			if !ok {
+				return
+			}
 
-			if types.Implements(ntype, i.Type().Underlying().(*types.Interface)) {
+			ntype := pass.TypesInfo.TypeOf(n.Name)
+			if types.Implements(ntype, i) {
 				if _, ok := typeGuardOwners[ntype.String()]; !ok {
 					pass.Reportf(n.Pos(), "%s is missing a type guard for Animal", n.Name.Name)
 				}
@@ -60,7 +63,7 @@ func run(pass *analysis.Pass) (any, error) {
 			}
 
 			nptype := types.NewPointer(ntype)
-			if types.Implements(nptype, i.Type().Underlying().(*types.Interface)) {
+			if types.Implements(nptype, i) {
 				if _, ok := typeGuardOwners[nptype.String()]; !ok {
 					pass.Reportf(n.Pos(), "%s is missing a type guard for Animal", n.Name.Name)
 				}
