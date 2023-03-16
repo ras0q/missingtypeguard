@@ -36,7 +36,7 @@ func (b bird) Speak() string { return "tweet" }
 
 var _ Animal = bird(0)
 
-type birdMissingTypeGuard int
+type birdMissingTypeGuard int // want "a.birdMissingTypeGuard is missing a type guard for a.Animal"
 
 func (b birdMissingTypeGuard) Speak() string { return "tweet" }
 
@@ -48,7 +48,7 @@ func (f *fish) Speak() string { return "blub" }
 
 var _ Animal = (*fish)(nil)
 
-type fishMissingTypeGuard int
+type fishMissingTypeGuard int // want "the pointer of a.fishMissingTypeGuard is missing a type guard for a.Animal"
 
 func (f *fishMissingTypeGuard) Speak() string { return "blub" }
 

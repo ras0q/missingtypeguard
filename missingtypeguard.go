@@ -56,7 +56,7 @@ func run(pass *analysis.Pass) (any, error) {
 	inspect.Preorder([]ast.Node{(*ast.TypeSpec)(nil)}, func(n ast.Node) {
 		switch n := n.(type) {
 		case *ast.TypeSpec:
-			if _, ok := n.Type.(*ast.StructType); !ok {
+			if _, ok := n.Type.(*ast.InterfaceType); ok {
 				return
 			}
 
