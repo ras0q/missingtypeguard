@@ -12,5 +12,12 @@ import (
 // TestAnalyzer is a test for Analyzer.
 func TestAnalyzer(t *testing.T) {
 	testdata := testutil.WithModules(t, analysistest.TestData(), nil)
-	analysistest.Run(t, testdata, missingtypeguard.Analyzer, "a")
+
+	t.Run("single", func(t *testing.T) {
+		analysistest.Run(t, testdata, missingtypeguard.Analyzer, "a/...")
+	})
+
+	t.Run("multi", func(t *testing.T) {
+		analysistest.Run(t, testdata, missingtypeguard.Analyzer, "multipackage/...")
+	})
 }

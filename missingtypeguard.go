@@ -1,6 +1,7 @@
 package missingtypeguard
 
 import (
+	"fmt"
 	"go/ast"
 	"go/types"
 
@@ -48,6 +49,12 @@ func run(pass *analysis.Pass) (any, error) {
 
 			itype := pass.TypesInfo.TypeOf(n.Type)
 			ntype := pass.TypesInfo.TypeOf(n.Values[0])
+
+			if typeGuardOwnersByInterfaces.At(itype) == nil {
+				fmt.Println("warning: multi package is not completely supported yet")
+				typeGuardOwnersByInterfaces.Set(itype, &typedMap[bool]{})
+			}
+
 			typeGuardOwnersByInterfaces.At(itype).Set(ntype, true)
 		}
 	})
