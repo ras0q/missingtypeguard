@@ -39,7 +39,7 @@ func run(pass *analysis.Pass) (any, error) {
 		}
 	})
 
-	// find all type guards for `Animal`
+	// find all type guards
 	inspect.Preorder([]ast.Node{(*ast.ValueSpec)(nil)}, func(n ast.Node) {
 		switch n := n.(type) {
 		case *ast.ValueSpec:
@@ -53,7 +53,7 @@ func run(pass *analysis.Pass) (any, error) {
 		}
 	})
 
-	// find structs missing type guards for `Animal`
+	// find structs missing type guards
 	inspect.Preorder([]ast.Node{(*ast.TypeSpec)(nil)}, func(n ast.Node) {
 		switch n := n.(type) {
 		case *ast.TypeSpec:
@@ -61,16 +61,16 @@ func run(pass *analysis.Pass) (any, error) {
 				return
 			}
 
-			i, ok := pass.Pkg.Scope().Lookup("Animal").Type().Underlying().(*types.Interface)
-			if !ok {
-				return
-			}
+			for itype, typeGuardOwners := range typeGuardOwnersByInterfaces {
+				i, ok := itype.Underlying().(*types.Interface)
+				if !ok {
+					continue
+				}
 
-			for _, typeGuardOwners := range typeGuardOwnersByInterfaces {
 				ntype := pass.TypesInfo.TypeOf(n.Name)
 				if types.Implements(ntype, i) {
 					if _, ok := typeGuardOwners[ntype.String()]; !ok {
-						pass.Reportf(n.Pos(), "%s is missing a type guard for Animal", n.Name.Name)
+						pass.Reportf(n.Pos(), "%s is missing a type guard for %s", ntype.String(), itype.String())
 					}
 
 					return // no need to check for pointer
@@ -79,7 +79,7 @@ func run(pass *analysis.Pass) (any, error) {
 				nptype := types.NewPointer(ntype)
 				if types.Implements(nptype, i) {
 					if _, ok := typeGuardOwners[nptype.String()]; !ok {
-						pass.Reportf(n.Pos(), "%s is missing a type guard for Animal", n.Name.Name)
+						pass.Reportf(n.Pos(), "the pointer of %s is missing a type guard for %s", ntype.String(), itype.String())
 					}
 				}
 			}
