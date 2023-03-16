@@ -24,7 +24,7 @@ var Analyzer = &analysis.Analyzer{
 func run(pass *analysis.Pass) (any, error) {
 	inspect := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 
-	typeGuardOwners := make(map[string]map[string]struct{})
+	typeGuardOwnersByInterfaces := make(map[string]map[string]struct{})
 
 	// find interfaces in the package
 	inspect.Preorder([]ast.Node{(*ast.TypeSpec)(nil)}, func(n ast.Node) {
@@ -35,7 +35,7 @@ func run(pass *analysis.Pass) (any, error) {
 			}
 
 			itype := pass.TypesInfo.TypeOf(n.Name)
-			typeGuardOwners[itype.String()] = make(map[string]struct{})
+			typeGuardOwnersByInterfaces[itype.String()] = make(map[string]struct{})
 		}
 	})
 
@@ -47,9 +47,9 @@ func run(pass *analysis.Pass) (any, error) {
 				return
 			}
 
-			if ident, ok := n.Type.(*ast.Ident); ok && ident.Name == "Animal" {
-				typeGuardOwners["a.Animal"][pass.TypesInfo.TypeOf(n.Values[0]).String()] = struct{}{}
-			}
+			itype := pass.TypesInfo.TypeOf(n.Type)
+			ntype := pass.TypesInfo.TypeOf(n.Values[0])
+			typeGuardOwnersByInterfaces[itype.String()][ntype.String()] = struct{}{}
 		}
 	})
 
@@ -66,19 +66,21 @@ func run(pass *analysis.Pass) (any, error) {
 				return
 			}
 
-			ntype := pass.TypesInfo.TypeOf(n.Name)
-			if types.Implements(ntype, i) {
-				if _, ok := typeGuardOwners["a.Animal"][ntype.String()]; !ok {
-					pass.Reportf(n.Pos(), "%s is missing a type guard for Animal", n.Name.Name)
+			for _, typeGuardOwners := range typeGuardOwnersByInterfaces {
+				ntype := pass.TypesInfo.TypeOf(n.Name)
+				if types.Implements(ntype, i) {
+					if _, ok := typeGuardOwners[ntype.String()]; !ok {
+						pass.Reportf(n.Pos(), "%s is missing a type guard for Animal", n.Name.Name)
+					}
+
+					return // no need to check for pointer
 				}
 
-				return // no need to check for pointer
-			}
-
-			nptype := types.NewPointer(ntype)
-			if types.Implements(nptype, i) {
-				if _, ok := typeGuardOwners["a.Animal"][nptype.String()]; !ok {
-					pass.Reportf(n.Pos(), "%s is missing a type guard for Animal", n.Name.Name)
+				nptype := types.NewPointer(ntype)
+				if types.Implements(nptype, i) {
+					if _, ok := typeGuardOwners[nptype.String()]; !ok {
+						pass.Reportf(n.Pos(), "%s is missing a type guard for Animal", n.Name.Name)
+					}
 				}
 			}
 		}
