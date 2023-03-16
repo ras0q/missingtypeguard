@@ -2,64 +2,63 @@ package main
 
 import "fmt"
 
-type Animal interface{ Speak() }
+type Animal interface{ Speak() string }
 
 // struct value receiver
 
 type dog struct{}
 
-func (d dog) Speak() { fmt.Println("woof") }
+func (d dog) Speak() string { return "woof" }
 
 var _ Animal = dog{}
 
 type dogMissingTypeGuard struct{}
 
-func (d dogMissingTypeGuard) Speak() { fmt.Println("woof") }
+func (d dogMissingTypeGuard) Speak() string { return "woof" }
 
 // struct pointer receiver
 
 type cat struct{}
 
-func (c *cat) Speak() { fmt.Println("meow") }
+func (c *cat) Speak() string { return "meow" }
 
 var _ Animal = (*cat)(nil)
 
 type catMissingTypeGuard struct{}
 
-func (c *catMissingTypeGuard) Speak() { fmt.Println("meow") }
+func (c *catMissingTypeGuard) Speak() string { return "meow" }
 
 // defined type value receiver
 
 type bird int
 
-func (b bird) Speak() { fmt.Println("tweet") }
+func (b bird) Speak() string { return "tweet" }
 
 var _ Animal = bird(0)
 
 type birdMissingTypeGuard int
 
-func (b birdMissingTypeGuard) Speak() { fmt.Println("tweet") }
+func (b birdMissingTypeGuard) Speak() string { return "tweet" }
 
 // defined type pointer receiver
 
 type fish int
 
-func (f *fish) Speak() { fmt.Println("blub") }
+func (f *fish) Speak() string { return "blub" }
 
 var _ Animal = (*fish)(nil)
 
 type fishMissingTypeGuard int
 
-func (f *fishMissingTypeGuard) Speak() { fmt.Println("blub") }
+func (f *fishMissingTypeGuard) Speak() string { return "blub" }
 
 func speakIfAnimal(a any) {
 	if a, ok := a.(Animal); ok {
-		fmt.Println("is an animal")
-		a.Speak()
+		fmt.Printf("%T is an animal: %s\n", a, a.Speak())
 		return
 	}
 
-	fmt.Println("is not an animal")
+	fmt.Printf("%T is not an animal\n", a)
 }
 
 func main() {
