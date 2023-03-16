@@ -1,38 +1,8 @@
-package a
+package main
 
 import "fmt"
 
 type Animal interface{ Speak() }
-
-func f() {
-	var a Animal
-
-	a = dog{}
-	a.Speak()
-
-	a = dogMissingTypeGuard{}
-	a.Speak() // want "dogMissingTypeGuard is used as Animal, but it does not have a type guard"
-
-	a = &cat{}
-	a.Speak()
-
-	a = &catMissingTypeGuard{}
-	a.Speak() // want "catMissingTypeGuard is used as Animal, but it does not have a type guard"
-
-	a = bird(0)
-	a.Speak()
-
-	a = birdMissingTypeGuard(0)
-	a.Speak() // want "birdMissingTypeGuard is used as Animal, but it does not have a type guard"
-
-	var f fish
-	a = &f
-	a.Speak()
-
-	var f2 fishMissingTypeGuard
-	a = &f2
-	a.Speak() // want "fishMissingTypeGuard is used as Animal, but it does not have a type guard"
-}
 
 // struct value receiver
 
@@ -81,3 +51,44 @@ var _ Animal = (*fish)(nil)
 type fishMissingTypeGuard int
 
 func (f *fishMissingTypeGuard) Speak() { fmt.Println("blub") }
+
+func speakIfAnimal(a any) {
+	if a, ok := a.(Animal); ok {
+		fmt.Println("is an animal")
+		a.Speak()
+		return
+	}
+
+	fmt.Println("is not an animal")
+}
+
+func main() {
+	var (
+		dog1  = dog{}
+		dog2  = dogMissingTypeGuard{}
+		cat1  = cat{}
+		cat2  = catMissingTypeGuard{}
+		bird1 = bird(0)
+		bird2 = birdMissingTypeGuard(0)
+		fish1 = fish(0)
+		fish2 = fishMissingTypeGuard(0)
+	)
+
+	speakIfAnimal(dog1)
+	speakIfAnimal(&dog1)
+	speakIfAnimal(dog2)
+	speakIfAnimal(&dog2)
+	speakIfAnimal(cat1)
+	speakIfAnimal(&cat1)
+	speakIfAnimal(cat2)
+	speakIfAnimal(&cat2)
+	speakIfAnimal(bird1)
+	speakIfAnimal(&bird1)
+	speakIfAnimal(bird2)
+	speakIfAnimal(&bird2)
+	speakIfAnimal(fish1)
+	speakIfAnimal(&fish1)
+	speakIfAnimal(fish2)
+	speakIfAnimal(&fish2)
+	speakIfAnimal("gopher")
+}
