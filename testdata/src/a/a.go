@@ -12,7 +12,7 @@ func (d dog) Speak() string { return "woof" }
 
 var _ Animal = dog{}
 
-type dogMissingTypeGuard struct{}
+type dogMissingTypeGuard struct{} // want "dogMissingTypeGuard is missing a type guard for Animal"
 
 func (d dogMissingTypeGuard) Speak() string { return "woof" }
 
