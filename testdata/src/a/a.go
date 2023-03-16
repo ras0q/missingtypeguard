@@ -24,7 +24,7 @@ func (c *cat) Speak() string { return "meow" }
 
 var _ Animal = (*cat)(nil)
 
-type catMissingTypeGuard struct{}
+type catMissingTypeGuard struct{} // want "catMissingTypeGuard is missing a type guard for Animal"
 
 func (c *catMissingTypeGuard) Speak() string { return "meow" }
 
