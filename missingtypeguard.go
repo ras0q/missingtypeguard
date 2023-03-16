@@ -23,7 +23,7 @@ var Analyzer = &analysis.Analyzer{
 func run(pass *analysis.Pass) (any, error) {
 	inspect := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 
-	typeGuardOwnersByInterfaces := make(map[types.Type]map[string]struct{})
+	typeGuardOwnersByInterfaces := typedMap[*typedMap[bool]]{}
 
 	// find interfaces in the package
 	inspect.Preorder([]ast.Node{(*ast.TypeSpec)(nil)}, func(n ast.Node) {
@@ -34,7 +34,7 @@ func run(pass *analysis.Pass) (any, error) {
 			}
 
 			itype := pass.TypesInfo.TypeOf(n.Name)
-			typeGuardOwnersByInterfaces[itype] = make(map[string]struct{})
+			typeGuardOwnersByInterfaces.Set(itype, &typedMap[bool]{})
 		}
 	})
 
@@ -48,7 +48,7 @@ func run(pass *analysis.Pass) (any, error) {
 
 			itype := pass.TypesInfo.TypeOf(n.Type)
 			ntype := pass.TypesInfo.TypeOf(n.Values[0])
-			typeGuardOwnersByInterfaces[itype][ntype.String()] = struct{}{}
+			typeGuardOwnersByInterfaces.At(itype).Set(ntype, true)
 		}
 	})
 
@@ -60,15 +60,15 @@ func run(pass *analysis.Pass) (any, error) {
 				return
 			}
 
-			for itype, typeGuardOwners := range typeGuardOwnersByInterfaces {
+			typeGuardOwnersByInterfaces.Iterate(func(itype types.Type, typeGuardOwners *typedMap[bool]) {
 				i, ok := itype.Underlying().(*types.Interface)
 				if !ok {
-					continue
+					return
 				}
 
 				ntype := pass.TypesInfo.TypeOf(n.Name)
 				if types.Implements(ntype, i) {
-					if _, ok := typeGuardOwners[ntype.String()]; !ok {
+					if ok := typeGuardOwners.At(ntype); !ok {
 						pass.Reportf(n.Pos(), "%s is missing a type guard for %s", ntype.String(), itype.String())
 					}
 
@@ -77,11 +77,11 @@ func run(pass *analysis.Pass) (any, error) {
 
 				nptype := types.NewPointer(ntype)
 				if types.Implements(nptype, i) {
-					if _, ok := typeGuardOwners[nptype.String()]; !ok {
+					if ok := typeGuardOwners.At(nptype); !ok {
 						pass.Reportf(n.Pos(), "the pointer of %s is missing a type guard for %s", ntype.String(), itype.String())
 					}
 				}
-			}
+			})
 		}
 	})
 
