@@ -1,6 +1,7 @@
 package missingtypeguard_test
 
 import (
+	"os"
 	"testing"
 
 	"github.com/ras0q/missingtypeguard"
@@ -13,19 +14,16 @@ import (
 func TestAnalyzer(t *testing.T) {
 	testdata := testutil.WithModules(t, analysistest.TestData(), nil)
 
-	t.Run("single", func(t *testing.T) {
-		analysistest.Run(t, testdata, missingtypeguard.Analyzer, "a/...")
-	})
+	childDirs, err := os.ReadDir(testdata + "/src")
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	t.Run("multi", func(t *testing.T) {
-		analysistest.Run(t, testdata, missingtypeguard.Analyzer, "multipackage/...")
-	})
-
-	t.Run("standard", func(t *testing.T) {
-		analysistest.Run(t, testdata, missingtypeguard.Analyzer, "standardpackage/...")
-	})
-
-	t.Run("constructor", func(t *testing.T) {
-		analysistest.Run(t, testdata, missingtypeguard.Analyzer, "constructor/...")
-	})
+	for _, childDir := range childDirs {
+		if childDir.IsDir() {
+			t.Run(childDir.Name(), func(t *testing.T) {
+				analysistest.Run(t, testdata, missingtypeguard.Analyzer, childDir.Name()+"/...")
+			})
+		}
+	}
 }

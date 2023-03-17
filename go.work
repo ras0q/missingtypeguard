@@ -2,8 +2,8 @@ go 1.20
 
 use (
 	.
-	./testdata/src/a
 	./testdata/src/constructor
 	./testdata/src/multipackage
+	./testdata/src/singlepackage
 	./testdata/src/standardpackage
 )

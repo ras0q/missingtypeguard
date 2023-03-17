@@ -12,7 +12,7 @@ func (d dog) Speak() string { return "woof" }
 
 var _ Animal = dog{}
 
-type dogMissingTypeGuard struct{} // want "a.dogMissingTypeGuard is missing a type guard for a.Animal"
+type dogMissingTypeGuard struct{} // want "singlepackage.dogMissingTypeGuard is missing a type guard for singlepackage.Animal"
 
 func (d dogMissingTypeGuard) Speak() string { return "woof" }
 
@@ -24,7 +24,7 @@ func (c *cat) Speak() string { return "meow" }
 
 var _ Animal = (*cat)(nil)
 
-type catMissingTypeGuard struct{} // want "the pointer of a.catMissingTypeGuard is missing a type guard for a.Animal"
+type catMissingTypeGuard struct{} // want "the pointer of singlepackage.catMissingTypeGuard is missing a type guard for singlepackage.Animal"
 
 func (c *catMissingTypeGuard) Speak() string { return "meow" }
 
@@ -36,7 +36,7 @@ func (b bird) Speak() string { return "tweet" }
 
 var _ Animal = bird(0)
 
-type birdMissingTypeGuard int // want "a.birdMissingTypeGuard is missing a type guard for a.Animal"
+type birdMissingTypeGuard int // want "singlepackage.birdMissingTypeGuard is missing a type guard for singlepackage.Animal"
 
 func (b birdMissingTypeGuard) Speak() string { return "tweet" }
 
@@ -48,7 +48,7 @@ func (f *fish) Speak() string { return "blub" }
 
 var _ Animal = (*fish)(nil)
 
-type fishMissingTypeGuard int // want "the pointer of a.fishMissingTypeGuard is missing a type guard for a.Animal"
+type fishMissingTypeGuard int // want "the pointer of singlepackage.fishMissingTypeGuard is missing a type guard for singlepackage.Animal"
 
 func (f *fishMissingTypeGuard) Speak() string { return "blub" }
 
