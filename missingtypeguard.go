@@ -38,7 +38,7 @@ func run(pass *analysis.Pass) (any, error) {
 		}
 	})
 
-	// find interfaces in the Imported packages
+	// find interfaces in the imported packages
 	for _, pkg := range pass.Pkg.Imports() {
 		for _, name := range pkg.Scope().Names() {
 			obj, ok := pkg.Scope().Lookup(name).(*types.TypeName)
