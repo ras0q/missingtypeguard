@@ -1,7 +1,6 @@
 package missingtypeguard
 
 import (
-	"fmt"
 	"go/ast"
 	"go/types"
 
@@ -39,6 +38,22 @@ func run(pass *analysis.Pass) (any, error) {
 		}
 	})
 
+	// find interfaces in the Imported packages
+	for _, pkg := range pass.Pkg.Imports() {
+		for _, name := range pkg.Scope().Names() {
+			obj, ok := pkg.Scope().Lookup(name).(*types.TypeName)
+			if !ok {
+				continue
+			}
+
+			if named, ok := obj.Type().(*types.Named); ok {
+				if _, ok := named.Underlying().(*types.Interface); ok {
+					typeGuardOwnersByInterfaces.Set(named, &typedMap[bool]{})
+				}
+			}
+		}
+	}
+
 	// find all type guards
 	inspect.Preorder([]ast.Node{(*ast.ValueSpec)(nil)}, func(n ast.Node) {
 		switch n := n.(type) {
@@ -49,11 +64,6 @@ func run(pass *analysis.Pass) (any, error) {
 
 			itype := pass.TypesInfo.TypeOf(n.Type)
 			ntype := pass.TypesInfo.TypeOf(n.Values[0])
-
-			if typeGuardOwnersByInterfaces.At(itype) == nil {
-				fmt.Println("warning: multi package is not completely supported yet")
-				typeGuardOwnersByInterfaces.Set(itype, &typedMap[bool]{})
-			}
 
 			typeGuardOwnersByInterfaces.At(itype).Set(ntype, true)
 		}
