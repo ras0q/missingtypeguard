@@ -32,6 +32,12 @@ func main() {
 }
 ```
 
+### allow list
+
+- `var _ Animal = dog{}`, `var _ Animal = (*cat)(nil)` in the global scope
+- `func NewDog() Animal { return dog{} }`, `func NewCat() Animal { return &cat{} }`
+- `func f() { var a Animal = dog{} }`, `func f() { var a Animal = &cat{} }`
+
 ## Usage
 
 ```bash
