@@ -1,7 +1,7 @@
 package main
 
 import (
-	"missingtypeguard"
+	"github.com/ras0q/missingtypeguard"
 
 	"golang.org/x/tools/go/analysis/unitchecker"
 )

@@ -1,4 +1,4 @@
-module missingtypeguard
+module github.com/ras0q/missingtypeguard
 
 go 1.20
 

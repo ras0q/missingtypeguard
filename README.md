@@ -31,3 +31,10 @@ func main() {
     speakIfAnimal(dogMissingTypeGuard{})
 }
 ```
+
+## Usage
+
+```bash
+go install github.com/ras0q/missingtypeguard/cmd/missingtypeguard@latest
+go vet -vettool=$(which missingtypeguard) ./...
+```

@@ -3,7 +3,7 @@ package missingtypeguard_test
 import (
 	"testing"
 
-	"missingtypeguard"
+	"github.com/ras0q/missingtypeguard"
 
 	"github.com/gostaticanalysis/testutil"
 	"golang.org/x/tools/go/analysis/analysistest"
