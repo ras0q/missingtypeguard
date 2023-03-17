@@ -4,4 +4,5 @@ use (
 	.
 	./testdata/src/a
 	./testdata/src/multipackage
+	./testdata/src/standardpackage
 )

@@ -20,4 +20,8 @@ func TestAnalyzer(t *testing.T) {
 	t.Run("multi", func(t *testing.T) {
 		analysistest.Run(t, testdata, missingtypeguard.Analyzer, "multipackage/...")
 	})
+
+	t.Run("standard", func(t *testing.T) {
+		analysistest.Run(t, testdata, missingtypeguard.Analyzer, "standardpackage/...")
+	})
 }
