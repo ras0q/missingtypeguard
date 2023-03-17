@@ -1,4 +1,4 @@
-package multipackage
+package sub
 
 type Interface interface {
 	DoSomething()
