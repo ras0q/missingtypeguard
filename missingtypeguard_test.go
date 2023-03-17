@@ -24,4 +24,8 @@ func TestAnalyzer(t *testing.T) {
 	t.Run("standard", func(t *testing.T) {
 		analysistest.Run(t, testdata, missingtypeguard.Analyzer, "standardpackage/...")
 	})
+
+	t.Run("constructor", func(t *testing.T) {
+		analysistest.Run(t, testdata, missingtypeguard.Analyzer, "constructor/...")
+	})
 }
