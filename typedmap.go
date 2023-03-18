@@ -23,6 +23,12 @@ func (m *typedMap[T]) Set(key types.Type, val T) {
 	m.Map.Set(key, val)
 }
 
+func (m *typedMap[T]) SetIfNotExists(key types.Type, val T) {
+	if _, ok := m.Map.At(key).(T); !ok {
+		m.Map.Set(key, val)
+	}
+}
+
 func (m *typedMap[T]) Iterate(f func(key types.Type, value T)) {
 	m.Map.Iterate(func(key types.Type, value interface{}) {
 		f(key, value.(T))

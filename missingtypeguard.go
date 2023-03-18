@@ -52,9 +52,7 @@ func run(pass *analysis.Pass) (any, error) {
 		case *ast.TypeSpec:
 			switch n.Type.(type) {
 			case *ast.InterfaceType:
-				if typeGuardOwnersByInterfaces.At(pass.TypesInfo.TypeOf(n.Name)) == nil {
-					typeGuardOwnersByInterfaces.Set(pass.TypesInfo.TypeOf(n.Name), &typedMap[bool]{})
-				}
+				typeGuardOwnersByInterfaces.SetIfNotExists(pass.TypesInfo.TypeOf(n.Name), &typedMap[bool]{})
 
 			default:
 				typesMap.Set(pass.TypesInfo.TypeOf(n.Name), n.Pos())
@@ -66,10 +64,7 @@ func run(pass *analysis.Pass) (any, error) {
 			}
 
 			itype := pass.TypesInfo.TypeOf(n.Type)
-			if typeGuardOwnersByInterfaces.At(itype) == nil {
-				typeGuardOwnersByInterfaces.Set(itype, &typedMap[bool]{})
-			}
-
+			typeGuardOwnersByInterfaces.SetIfNotExists(itype, &typedMap[bool]{})
 			typeGuardOwnersByInterfaces.At(itype).Set(pass.TypesInfo.TypeOf(n.Values[0]), true)
 		}
 	})
@@ -94,7 +89,6 @@ func run(pass *analysis.Pass) (any, error) {
 			if types.Implements(nptype, i) && !typeGuardOwners.At(nptype) {
 				pass.Reportf(pos, "the pointer of %s is missing a type guard for %s", ntype, itype)
 			}
-
 		})
 	})
 
